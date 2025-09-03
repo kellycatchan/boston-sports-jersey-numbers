@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Boston Sports Connections</title>
+  <style>
+    :root {
+      --bg: #0b0f16;
+      --card: #121826;
+      --card-2: #162033;
+      --accent: #3b82f6;
+      --accent-2: #22c55e;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --shadow: 0 8px 24px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 80% -10%, #1b2640 0%, transparent 60%),
+                  radial-gradient(800px 500px at -10% 110%, #122237 0%, transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .app {
+      width: min(1100px, 95vw);
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin-bottom: 18px;
+    }
+    h1 { font-size: clamp(22px, 3vw, 32px); margin: 0; letter-spacing: .3px; }
+    .subtitle { color: var(--muted); font-size: 14px; }
+
+    .topbar { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+    .btn {
+      appearance: none; border: 0; cursor: pointer; padding: 10px 14px; border-radius: 999px;
+      background: linear-gradient(180deg, var(--accent), #215cc9);
+      color: white; font-weight: 700; letter-spacing: .2px; box-shadow: var(--shadow);
+      transition: transform .06s ease, filter .2s ease, opacity .2s ease;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px) scale(.99); }
+    .btn.secondary { background: linear-gradient(180deg, #374151, #1f2937); color: #e5e7eb; }
+    .btn.ghost { background: transparent; border: 1px solid #334155; box-shadow: none; color: var(--text); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    .statusbar { display:flex; gap:14px; align-items:center; }
+    .pill { padding: 8px 12px; border-radius: 999px; background: #0e1627; border: 1px solid #1e293b; color: #cbd5e1; font-size: 13px; }
+
+    .banner { margin: 14px 0 18px; padding: 12px 14px; border-radius: var(--radius);
+      background: #0f172a; border:1px solid #1e293b; color: #cbd5e1; display:none; }
+    .banner.show { display:block; }
+    .banner.good { border-color: #1a2f22; background: #0b1f14; color:#c6f6d5; }
+    .banner.bad { border-color: #3a1e22; background: #1f0b0e; color:#fecaca; }
+    .banner.warn { border-color: #3a2b12; background: #1b1406; color:#fde68a; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 720px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .card {
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid #1e293b;
+      padding: 16px 14px; min-height: 86px;
+      box-shadow: var(--shadow);
+      cursor: pointer; user-select: none;
+      display:flex; flex-direction: column; justify-content: center; align-items: flex-start;
+      transition: transform .08s ease, outline .2s ease, background .2s ease, border-color .2s ease;
+      position: relative; overflow: hidden;
+    }
+    .card .name { font-weight: 750; font-size: 16px; line-height: 1.15; }
+    .card .team { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .card .badge { position:absolute; top:8px; right:8px; background:#0b1220; border:1px solid #1e293b; color:#cbd5e1; font-size:11px; padding:4px 8px; border-radius:999px; }
+
+    .card:hover { transform: translateY(-1px); }
+    .card.selected { outline: 3px solid var(--accent); border-color: #60a5fa; }
+    .card.locked { background: linear-gradient(180deg, #0f1f17, #0c2617); border-color: #1f513a; cursor: default; }
+
+    .found-wrap { margin-top: 18px; display: grid; gap: 10px; }
+    .found-row { display:flex; align-items:center; gap: 10px; background:#0f172a; border:1px solid #1e293b; border-radius: var(--radius); padding: 10px 12px; }
+    .label { font-weight: 800; font-size: 13px; color:#93c5fd; }
+    .chips { display:flex; flex-wrap: wrap; gap:8px; }
+    .chip { background:#0b1220; border:1px solid #1e293b; color:#cbd5e1; padding:6px 10px; border-radius:999px; font-size:12px; }
+
+    footer { margin-top: 18px; color: var(--muted); font-size: 12px; text-align: center; }
+    .hide { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Boston Sports Connections</h1>
+        <div class="subtitle">Find 4 groups of players who share the <strong>same jersey number</strong> across Celtics, Bruins, Patriots, and Red Sox.</div>
+      </div>
+      <div class="topbar">
+        <button class="btn ghost" id="shuffleBtn" title="Shuffle the board">Shuffle</button>
+        <button class="btn secondary" id="resetBtn" title="Restart the puzzle">Restart</button>
+        <button class="btn" id="shareBtn" title="Copy your result">Share</button>
+      </div>
+    </header>
+
+    <div class="statusbar">
+      <div class="pill" id="progress">0/4 groups found</div>
+      <div class="pill" id="selectionPill">0 selected</div>
+      <div class="pill">Numbers in play: <strong>#33 · #4 · #12 · #24</strong></div>
+      <button id="submitBtn" class="btn" disabled>Submit Group</button>
+    </div>
+
+    <div class="banner" id="banner"></div>
+
+    <main class="grid" id="grid"></main>
+
+    <section class="found-wrap" id="found"></section>
+
+    <footer>
+      Made with HTML/CSS/JS. Embed this file in WordPress via an iframe or upload as a page.
+    </footer>
+  </div>
+
+  <script>
+    // --- Data ---------------------------------------------------------------
+    const GROUPS = [
+      {
+        number: 33,
+        players: [
+          { name: "Larry Bird", team: "Celtics" },
+          { name: "Zdeno Chára", team: "Bruins" },
+          { name: "Kevin Faulk", team: "Patriots" },
+          { name: "Jason Varitek", team: "Red Sox" },
+        ],
+      },
+      {
+        number: 4,
+        players: [
+          { name: "Bobby Orr", team: "Bruins" },
+          { name: "Bob Cousy", team: "Celtics" },
+          { name: "Adam Vinatieri", team: "Patriots" },
+          { name: "Joe Cronin", team: "Red Sox" },
+        ],
+      },
+      {
+        number: 12,
+        players: [
+          { name: "Tom Brady", team: "Patriots" },
+          { name: "Adam Oates", team: "Bruins" },
+          { name: "Chris Ford", team: "Celtics" },
+          { name: "Johnny Pesky", team: "Red Sox" },
+        ],
+      },
+      {
+        number: 24,
+        players: [
+          { name: "Ty Law", team: "Patriots" },
+          { name: "Sam Jones", team: "Celtics" },
+          { name: "Terry O’Reilly", team: "Bruins" },
+          { name: "Dwight Evans", team: "Red Sox" },
+        ],
+      },
+    ];
+
+    // Flatten to a 16-card deck
+    const ALL_PLAYERS = GROUPS.flatMap(g => g.players.map(p => ({ ...p, number: g.number })));
+
+    // --- State --------------------------------------------------------------
+    let deck = [];
+    let selected = new Set(); // store indexes in deck
+    let solvedGroups = []; // {number, players[]}
+
+    // --- Elements -----------------------------------------------------------
+    const grid = document.getElementById('grid');
+    const banner = document.getElementById('banner');
+    const progress = document.getElementById('progress');
+    const selectionPill = document.getElementById('selectionPill');
+    const found = document.getElementById('found');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const shareBtn = document.getElementById('shareBtn');
+
+    // --- Utils --------------------------------------------------------------
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function setBanner(type, text) {
+      banner.className = `banner show ${type || ''}`.trim();
+      banner.textContent = text;
+      if (type) {
+        // Auto hide after 1800ms for feedback banners
+        clearTimeout(setBanner._t);
+        setBanner._t = setTimeout(() => banner.classList.remove('show'), 1800);
+      }
+    }
+
+    function updatePills() {
+      progress.textContent = `${solvedGroups.length}/4 groups found`;
+      selectionPill.textContent = `${selected.size} selected`;
+      submitBtn.disabled = selected.size !== 4;
+    }
+
+    function renderGrid() {
+      grid.innerHTML = '';
+      deck.forEach((card, idx) => {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'card';
+        el.dataset.index = idx;
+        el.innerHTML = `
+          <div class="name">${card.name}</div>
+          <div class="team">${card.team}</div>
+        `;
+        if (card.locked) el.classList.add('locked');
+        if (selected.has(idx)) el.classList.add('selected');
+        el.addEventListener('click', () => onCardClick(idx));
+        grid.appendChild(el);
+      });
+    }
+
+    function renderFound() {
+      found.innerHTML = '';
+      solvedGroups.forEach(g => {
+        const row = document.createElement('div');
+        row.className = 'found-row';
+        row.innerHTML = `
+          <div class="label">#${g.number}</div>
+          <div class="chips"></div>
+        `;
+        const chips = row.querySelector('.chips');
+        g.players.forEach(p => {
+          const c = document.createElement('div');
+          c.className = 'chip';
+          c.textContent = `${p.name} · ${p.team}`;
+          chips.appendChild(c);
+        });
+        found.appendChild(row);
+      });
+    }
+
+    // --- Interactions -------------------------------------------------------
+    function onCardClick(idx) {
+      const card = deck[idx];
+      if (card.locked) return;
+      if (selected.has(idx)) selected.delete(idx); else selected.add(idx);
+      // Cap selection at 4
+      if (selected.size > 4) {
+        // remove the earliest selected
+        const first = selected.values().next().value;
+        selected.delete(first);
+      }
+      updatePills();
+      renderGrid();
+    }
+
+    function submitGroup() {
+      if (selected.size !== 4) return;
+      const indices = Array.from(selected);
+      const nums = new Set(indices.map(i => deck[i].number));
+      if (nums.size === 1) {
+        // Correct group
+        const number = [...nums][0];
+        const players = indices.map(i => deck[i]);
+        setBanner('good', `Correct! All wore #${number}.`);
+        // lock cards & move to bottom of grid visually by keeping order but styling locked
+        indices.forEach(i => deck[i].locked = true);
+        solvedGroups.push({ number, players });
+        // Clear selection
+        selected.clear();
+        // Move locked cards to the end to declutter board
+        deck.sort((a, b) => (a.locked === b.locked) ? 0 : a.locked ? 1 : -1);
+        updatePills();
+        renderGrid();
+        renderFound();
+        if (solvedGroups.length === 4) {
+          setBanner('', '🏆 You solved it! All four numbers found.');
+          submitBtn.disabled = true;
+        }
+      } else {
+        // Count how many numbers present to give a helpful hint
+        const counts = {};
+        indices.forEach(i => { counts[deck[i].number] = (counts[deck[i].number]||0) + 1; });
+        const best = Object.values(counts).reduce((a,b) => Math.max(a,b), 0);
+        const hint = best >= 3 ? 'Very close—3 of these match!' : best === 2 ? 'Halfway there—2 match.' : 'These don\'t look related.';
+        setBanner('bad', `Not quite. ${hint}`);
+        // brief shake animation
+        grid.classList.add('shake');
+        setTimeout(() => grid.classList.remove('shake'), 400);
+      }
+    }
+
+    function resetGame() {
+      selected.clear();
+      solvedGroups = [];
+      deck = shuffle(ALL_PLAYERS.map(p => ({ ...p })));
+      deck.forEach(p => p.locked = false);
+      setBanner('', 'New puzzle loaded.');
+      updatePills();
+      renderGrid();
+      renderFound();
+    }
+
+    function shuffleBoard() {
+      deck = shuffle(deck);
+      renderGrid();
+      setBanner('warn', 'Shuffled the board.');
+    }
+
+    function shareResult() {
+      const rows = solvedGroups.map(g => `#${g.number}: ` + g.players.map(p => p.name.split(' ')[1]||p.name).join(', '));
+      const text = `Boston Sports Connections — ${solvedGroups.length}/4 completed\n` + rows.join('\n');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => setBanner('', 'Result copied to clipboard!'))
+          .catch(() => setBanner('warn', 'Could not access clipboard.'));
+      } else {
+        setBanner('warn', text);
+      }
+    }
+
+    // --- Startup ------------------------------------------------------------
+    submitBtn.addEventListener('click', submitGroup);
+    resetBtn.addEventListener('click', resetGame);
+    shuffleBtn.addEventListener('click', shuffleBoard);
+    shareBtn.addEventListener('click', shareResult);
+
+    // tiny CSS keyframes for shake (injected)
+    const style = document.createElement('style');
+    style.textContent = `@keyframes shake { 10%, 90% { transform: translateX(-2px);} 20%, 80% { transform: translateX(4px);} 30%, 50%, 70% { transform: translateX(-8px);} 40%, 60% { transform: translateX(8px);} } .shake { animation: shake .35s; }`;
+    document.head.appendChild(style);
+
+    resetGame();
+  </script>
+</body>
+</html>
