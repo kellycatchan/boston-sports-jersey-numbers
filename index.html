@@ -105,7 +105,6 @@
       <div class="topbar">
         <button class="btn" id="shuffleBtn" title="Shuffle the board">Shuffle</button>
         <button class="btn" id="resetBtn" title="Restart the puzzle">Restart</button>
-        <button class="btn" id="shareBtn" title="Copy your result">Share</button>
       </div>
     </header>
 
@@ -181,7 +180,6 @@
     const submitBtn = document.getElementById('submitBtn');
     const resetBtn = document.getElementById('resetBtn');
     const shuffleBtn = document.getElementById('shuffleBtn');
-    const shareBtn = document.getElementById('shareBtn');
 
     // --- Utils --------------------------------------------------------------
     function shuffle(array) {
@@ -315,23 +313,10 @@
     }
 
 
-//CONFUSED ABOUT WHY THIS IS VITAL
-    function shareResult() {
-      const rows = solvedGroups.map(g => `#${g.number}: ` + g.players.map(p => p.name.split(' ')[1]||p.name).join(', '));
-      const text = `Boston Sports Connections — ${solvedGroups.length}/4 completed\n` + rows.join('\n');
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => setBanner('', 'Results copied to clipboard!'))
-          .catch(() => setBanner('warn', 'Could not access clipboard.'));
-      } else {
-        setBanner('warn', text);
-      }
-    }
-
     // --- Startup ------------------------------------------------------------
     submitBtn.addEventListener('click', submitGroup);
     resetBtn.addEventListener('click', resetGame);
     shuffleBtn.addEventListener('click', shuffleBoard);
-    shareBtn.addEventListener('click', shareResult);
 
     // tiny CSS keyframes for shake (injected)
     const style = document.createElement('style');
