@@ -1,71 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Boston Sports Connections</title>
-<style>
-:root {
---bg: #0b0f16;
---card: #121826;
---card-2: #162033;
---accent: #3b82f6;
---accent-2: #22c55e;
---warn: #f59e0b;
---bad: #ef4444;
---text: #e5e7eb;
---muted: #9ca3af;
---shadow: 0 8px 24px rgba(0,0,0,.35);
---radius: 18px;
+box-shadow: var(--shadow);
+cursor: pointer; user-select: none;
+display:flex; flex-direction: column; justify-content: center; align-items: flex-start;
+transition: transform .08s ease, outline .2s ease, background .2s ease, border-color .2s ease;
+position: relative; overflow: hidden;
 }
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-margin: 0;
-font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-background: radial-gradient(1200px 600px at 80% -10%, #1b2640 0%, transparent 60%),
-radial-gradient(800px 500px at -10% 110%, #122237 0%, transparent 60%),
-var(--bg);
-color: var(--text);
-display: grid;
-place-items: center;
-padding: 24px;
-}
-.app {
-width: min(1100px, 95vw);
-}
-header {
-display: flex; align-items: center; justify-content: space-between; gap: 16px;
-margin-bottom: 18px;
-}
-h1 { font-size: clamp(22px, 3vw, 32px); margin: 0; letter-spacing: .3px; }
-.subtitle { color: var(--muted); font-size: 14px; }
+.card .name { font-weight: 750; font-size: 16px; line-height: 1.15; }
+.card .team { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.card .badge { position:absolute; top:8px; right:8px; background:#0b1220; border:1px solid #1e293b; color:#cbd5e1; font-size:11px; padding:4px 8px; border-radius:999px; }
 
 
-.topbar { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
-.btn {
-appearance: none; border: 0; cursor: pointer; padding: 10px 14px; border-radius: 999px;
-background: linear-gradient(180deg, var(--accent), #215cc9);
-color: white; font-weight: 700; letter-spacing: .2px; box-shadow: var(--shadow);
-transition: transform .06s ease, filter .2s ease, opacity .2s ease;
-}
-.btn:hover { filter: brightness(1.05); }
-.btn:active { transform: translateY(1px) scale(.99); }
-.btn.secondary { background: linear-gradient(180deg, #374151, #1f2937); color: #e5e7eb; }
-.btn.ghost { background: transparent; border: 1px solid #334155; box-shadow: none; color: var(--text); }
-.btn:disabled { opacity: .55; cursor: not-allowed; }
+.card:hover { transform: translateY(-1px); }
+.card.selected { outline: 3px solid var(--accent); border-color: #60a5fa; }
+.card.locked { background: linear-gradient(180deg, #0f1f17, #0c2617); border-color: #1f513a; cursor: default; }
 
 
-.statusbar { display:flex; gap:14px; align-items:center; }
-.pill { padding: 8px 12px; border-radius: 999px; background: #0e1627; border: 1px solid #1e293b; color: #cbd5e1; font-size: 13px; }
+.found-wrap { margin-top: 18px; display: grid; gap: 10px; }
+.found-row { display:flex; align-items:center; gap: 10px; background:#0f172a; border:1px solid #1e293b; border-radius: var(--radius); padding: 10px 12px; }
+.label { font-weight: 800; font-size: 13px; color:#93c5fd; }
+.chips { display:flex; flex-wrap: wrap; gap:8px; }
+.chip { background:#0b1220; border:1px solid #1e293b; color:#cbd5e1; padding:6px 10px; border-radius:999px; font-size:12px; }
 
 
-.banner { margin: 14px 0 18px; padding: 12px 14px; border-radius: var(--radius);
-background: #0f172a; border:1px solid #1e293b; color: #cbd5e1; display:none; }
-.banner.show { display:block; }
-.banner.good { border-color: #1a2f22; background: #0b1f14; color:#c6f6d5; }
-.banner.bad { border-color: #3a1e22; background: #1f0b0e; color:#fecaca; }
-.banner.warn { border-color: #3a2b12; background: #1b1406; color:#fde68a; }
-
-
+footer { margin-top: 18px; color: var(--muted); font-size: 12px; text-align: center; }
+.hide { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<div>
+<h1>Boston Sports Connections</h1>
+<div class="subtitle">Find 4 groups of players who share the <strong>same jersey number</strong> across Celtics, Bruins, Patriots, and Red Sox.</div>
 </div>
+<div class="topbar">
+<button class="btn ghost" id="shuffleBtn" title="Shuffle the board">Shuffle</button>
+<button class="btn secondary" id="resetBtn" title="Restart the puzzle">Restart</button>
+<button class="btn" id="shareBtn" title="Copy your result">Share</button>
+</div>
+</header>
+
+
+<div class="statusbar">
+<div class="pill" id="progress">0/4 groups found</div>
+<div class="pill" id="selectionPill">0 selected</div>
+<div class="pill">Numbers in play: <strong>#33 · #4 · #12 · #24</strong></div>
+<button id="submitBtn" class="btn" disabled>Submit Group</button>
+</div>
+
+
+<div class="banner" id="banner"></div>
+
+
+<main class="grid" id="grid"></main>
+
+
+<section class="found-wrap" id="found"></section>
+
+
+<footer>
+Made with HTML/CSS/JS. Embed this file in WordPress via an iframe or upload as a page.
+</footer>
+</div>
+  
+<script src="game.js"></script>
+
+
+</body>
+</html>
