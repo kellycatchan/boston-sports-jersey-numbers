@@ -24,7 +24,10 @@
       --radius: 18px;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body { 
+      height: 100%; 
+      overflow: hidden;
+    }
     body {
       margin: 0;
       font-family: 'Roboto Condensed', sans-serif;
@@ -35,6 +38,7 @@
     }
     .app {
       width: min(1100px, 95vw);
+      margin: 0 auto;
     }
     header {
       display: flex; align-items: center; justify-content: space-between; gap: 16px;
