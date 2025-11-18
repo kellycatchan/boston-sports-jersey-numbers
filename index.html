@@ -257,13 +257,15 @@
     function onCardClick(idx) {
       const card = deck[idx];
       if (card.locked) return;
-      if (selected.has(idx)) selected.delete(idx); else selected.add(idx);
-      // Cap selection at 4
-      if (selected.size > 4) {
-        // remove the earliest selected
-        const first = selected.values().next().value;
-        selected.delete(first);
+
+      if (selected.has(idx)) {
+        selected.delete(idx);
+      } else {
+
+        if (selected.size >= 4) return;
+        selected.add(idx);
       }
+
       updatePills();
       renderGrid();
     }
