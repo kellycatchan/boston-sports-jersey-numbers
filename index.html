@@ -246,7 +246,7 @@
         g.players.forEach(p => {
           const c = document.createElement('div');
           c.className = 'chip';
-          c.textContent = `${p.name} · ${p.team}`;
+          c.innerHTML = `${p.name} · ${p.team}`;
           chips.appendChild(c);
         });
         found.appendChild(row);
