@@ -70,14 +70,6 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
     }
-    @media only screen and (max-width: 600px) { 
-      .grid { grid-template-columns: repeat(4, 1fr); } 
-
-      .card .name { font-size: 6px; color: var(--text); font-weight: bold; line-height: 1; font-family:'Roboto Condensed';}
-      .card .team { font-size: 11px; color: var(--text); margin-top: 5px; font-family:'Roboto Condensed'; }
-
-      .mobile-name { font-size: 12px !important;}
-    }
 
     .card {
       border-radius: var(--radius);
@@ -105,6 +97,15 @@
 
     .found-row .mobile-name {
       font-size: inherit !important;
+    }
+    
+    @media only screen and (max-width: 600px) { 
+      .grid { grid-template-columns: repeat(4, 1fr); } 
+
+      .card .name { font-size: 12px; color: var(--text); font-weight: bold; line-height: 1; font-family:'Roboto Condensed';}
+      .card .team { font-size: 10px; color: var(--text); margin-top: 5px; font-family:'Roboto Condensed'; }
+
+      .mobile-name { font-size: 12px !important;}
     }
   </style>
 </head>
